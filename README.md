@@ -5,3 +5,4 @@ Day 3: To-Do-List-Manager
 Day 4: ATM_Simulation
 Day 5: Contact_Book
 Day 6: Student_Grade_Tracker
+Day 7: Library_Inventory
