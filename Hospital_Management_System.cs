@@ -3,49 +3,108 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using System.Xml;
 
-namespace Day_14
+namespace Day_15
 {
     class Patient
     {
-        public string Name {  get; set; }
-        public int Age { get; set; }
-        public string Desease { get; set; }
-        public Patient(string name, int age, string desease)
+        public string Name { get; set; }
+        public int Age {  get; set; }
+        public string Disease {  get; set; }
+        public Patient(string name, int age, string disease)
         {
             Name = name;
             Age = age;
-            Desease = desease;
+            Disease = disease;
         }
-        public void DisplayInfo()
+        public override string ToString()
         {
-            Console.WriteLine($"Name: {Name}, Age: {Age}, Desease: {Desease}");
+            return $"{Name}, {Age}, {Disease}";
+        }
+        public static Patient FromString(string data)
+        {
+            var parts = data.Split(',');
+            return new Patient(parts[0], int.Parse(parts[1]), parts[2]);
+        }
+        
+    }
+    class Doctor
+    {
+        public string Name { get; set; }
+        public string Specialty {  get; set; }
+        public Doctor(string name, string specialty)
+        {
+            Name = name;
+            Specialty = specialty;
+        }
+        public override string ToString()
+        {
+            return $"{Name}, {Specialty}";
+        }
+        public static Doctor FromString(string data)
+        {
+            var parts = data.Split(',');
+            return new Doctor(parts[0], parts[2]);
+        }
+    }
+    class Appointment
+    {
+        public string PatientName { get; set; }
+        public string DoctorName {  get; set; }
+        public string Date {  get; set; }
+        public Appointment(string patientName, string doctorName, string date)
+        {
+            PatientName = patientName;
+            DoctorName = doctorName;
+            Date = date;
+        }
+        public override string ToString()
+        {
+            return $"{PatientName}, {DoctorName}, {Date}";
+        }
+        public static Appointment FromString(string data)
+        {
+            var parts = data.Split(',');
+            return new Appointment(parts[0], parts[1], parts[2]);
         }
     }
     class Hospital
     {
-        private List<Patient> patients = new List<Patient>();
-        public void AddPatient( Patient patient)
+        private const string PatientsFile = "Patient.txt";
+        private const string DoctorsFile = "doctors.txt";
+        private const string AppointmentsFile = "appointments.txt";
+        public void AddPatient(Patient patient)
         {
-            patients.Add(patient);
-            Console.WriteLine("Patient added successfully.\n");
+            File.AppendAllText(PatientsFile, patient.ToString() + Environment.NewLine);
+            Console.WriteLine("Patient added successfullt.\n");
         }
-        public void SearchPatient(string name)
+        public void AddDoctor(Doctor doctor)
         {
-            var found = false;
-            foreach (var patient in patients)
+            File.AppendAllText(DoctorsFile, doctor.ToString() + Environment.NewLine);
+            Console.WriteLine("Doctor added successfully.\n");
+        }
+        public void AddAppointment(Appointment appointment)
+        {
+            File.AppendAllText(AppointmentsFile, appointment.ToString() + Environment.NewLine);
+            Console.WriteLine("Appointment scheduled successfully.\n");
+        }
+        public void ViewAllAppointments()
+        {
+            if (File.Exists(AppointmentsFile))
             {
-                if(patient.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                string[] lines = File.ReadAllLines(AppointmentsFile);
+                Console.WriteLine("\n---Appointments---");
+                foreach (string line in lines)
                 {
-                    Console.WriteLine("Patient found: ");
-                    patient.DisplayInfo();
-                    found = true;
-                    break;
+                    Appointment a = Appointment.FromString(line);
+                    Console.WriteLine($"Patient: {a.PatientName}, Doctor: {a.DoctorName}, Date: {a.Date}");
                 }
             }
-            if (!found)
+            else
             {
-                Console.WriteLine("Patient not found.\n");
+                Console.WriteLine("No appointments found.");
             }
         }
     }
@@ -58,40 +117,68 @@ namespace Day_14
             while (!exit)
             {
                 Console.Clear();
-                Console.WriteLine("---Hospital Management System---");
-                Console.WriteLine("1. Add Patient.");
-                Console.WriteLine("2. Search Patient.");
-                Console.WriteLine("3. Exit.");
-                Console.Write("Enter your choice");
+                Console.WriteLine("\n=== Hospital Management System (Advanced) ===");
+                Console.WriteLine("1. Add Patient");
+                Console.WriteLine("2. Add Doctor");
+                Console.WriteLine("3. Schedule Appointment");
+                Console.WriteLine("4. View Appointments");
+                Console.WriteLine("5. Exit");
+                Console.Write("Enter your choice: ");
                 string choice = Console.ReadLine();
+                Console.WriteLine();
+
                 switch (choice)
                 {
                     case "1":
                         Console.Clear();
-                        Console.Write("Enter patient Name: ");
-                        string name = Console.ReadLine();
+                        Console.Write("Enter patient name: ");
+                        string pName = Console.ReadLine();
                         Console.Write("Enter age: ");
-                        int age = int.Parse(Console.ReadLine());
-                        Console.Write("Enter Disease: ");
+                        int pAge = int.Parse(Console.ReadLine());
+                        Console.Write("Enter disease: ");
                         string disease = Console.ReadLine();
-                        hospital.AddPatient(new Patient(name, age, disease));
+                        hospital.AddPatient(new Patient(pName, pAge, disease));
                         Console.ReadKey();
                         break;
+
                     case "2":
                         Console.Clear();
-                        Console.Write("Enter patient name to search: ");
-                        string SearchName = Console.ReadLine();
-                        hospital.SearchPatient(SearchName);
+                        Console.Write("Enter doctor name: ");
+                        string dName = Console.ReadLine();
+                        Console.Write("Enter specialty: ");
+                        string specialty = Console.ReadLine();
+                        hospital.AddDoctor(new Doctor(dName, specialty));
                         Console.ReadKey();
                         break;
+
                     case "3":
+                        Console.Clear();
+                        Console.Write("Enter patient name: ");
+                        string apPatient = Console.ReadLine();
+                        Console.Write("Enter doctor name: ");
+                        string apDoctor = Console.ReadLine();
+                        Console.Write("Enter date (dd-mm-yyyy): ");
+                        string apDate = Console.ReadLine();
+                        hospital.AddAppointment(new Appointment(apPatient, apDoctor, apDate));
+                        Console.ReadKey();
+                        break;
+
+                    case "4":
+                        Console.Clear();
+                        hospital.ViewAllAppointments();
+                        Console.ReadKey();
+                        break;
+
+                    case "5":
                         exit = true;
                         break;
+
                     default:
                         Console.WriteLine("Invalid choice. Try again.\n");
                         break;
                 }
             }
+
             Console.WriteLine("Thank you for using the system.");
         }
     }
