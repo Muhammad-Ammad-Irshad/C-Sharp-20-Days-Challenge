@@ -21,4 +21,4 @@
   - Day 17: Flight_Booking_System
   - Day 18: Chat_log
   - Day 19: Password_Manager
-  - Day 20: 
+  - Day 20: Clinic_Management_System
